@@ -16,9 +16,6 @@ from . import config
 from .db import query
 
 
-# --------------------------------------------------------------------------
-# Part 2: data overview
-# --------------------------------------------------------------------------
 def frequency_summary(db_path: Path | str = config.DB_PATH) -> pd.DataFrame:
     """Relative frequency of each population in each sample.
 
@@ -49,9 +46,6 @@ def frequency_with_metadata(db_path: Path | str = config.DB_PATH) -> pd.DataFram
     )
 
 
-# --------------------------------------------------------------------------
-# Part 3: responders vs non-responders
-# --------------------------------------------------------------------------
 def responder_cohort(
     db_path: Path | str = config.DB_PATH,
     condition: str = config.MELANOMA,
@@ -190,9 +184,6 @@ def significance_narrative(results: pd.DataFrame, alpha: float = config.ALPHA) -
     return " ".join(lines)
 
 
-# --------------------------------------------------------------------------
-# Part 4: baseline subset
-# --------------------------------------------------------------------------
 def baseline_subset(
     db_path: Path | str = config.DB_PATH,
     condition: str = config.MELANOMA,

@@ -43,7 +43,6 @@ def _lookup(conn: sqlite3.Connection, table: str, values) -> dict[str, int]:
 
 def load_dataframe(conn: sqlite3.Connection, df: pd.DataFrame) -> dict[str, int]:
     """Populate every table from the wide dataframe. Returns row counts."""
-    # --- dimensions -------------------------------------------------------
     projects = sorted(df["project"].dropna().unique())
     conn.executemany("INSERT INTO project (project_id) VALUES (?)", [(p,) for p in projects])
 
@@ -58,7 +57,6 @@ def load_dataframe(conn: sqlite3.Connection, df: pd.DataFrame) -> dict[str, int]
     )
     pop_ids = {name: i for i, name in enumerate(populations, start=1)}
 
-    # --- subjects ---------------------------------------------------------
     subj_cols = ["subject", "project", "condition", "age", "sex", "treatment", "response"]
     subjects = df[subj_cols].drop_duplicates(subset="subject")
     conflicting = df[subj_cols].drop_duplicates()
@@ -84,7 +82,6 @@ def load_dataframe(conn: sqlite3.Connection, df: pd.DataFrame) -> dict[str, int]
         ],
     )
 
-    # --- samples ----------------------------------------------------------
     conn.executemany(
         "INSERT INTO sample (sample_id, subject_id, sample_type_id, "
         "time_from_treatment_start) VALUES (?, ?, ?, ?)",
@@ -99,7 +96,6 @@ def load_dataframe(conn: sqlite3.Connection, df: pd.DataFrame) -> dict[str, int]
         ],
     )
 
-    # --- counts (wide -> long) -------------------------------------------
     long = df.melt(
         id_vars="sample", value_vars=populations, var_name="population", value_name="count"
     ).dropna(subset=["count"])

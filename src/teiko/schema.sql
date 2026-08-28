@@ -1,12 +1,6 @@
--- Relational schema for Loblaw Bio clinical trial cell-count data.
---
--- Design notes:
---   * One row per (sample, population) in cell_count -- a long/tidy fact table.
---     Adding a sixth immune population is a data insert, never a schema change.
---   * Subject-level attributes (condition, demographics, trial arm, outcome) are
---     stored once on `subject` instead of being repeated on every sample row.
---   * Lookup tables keep the categorical vocabularies (condition, treatment,
---     sample type, population) closed and cheap to join/index.
+-- Schema for the Loblaw Bio cell-count data.
+-- Counts are stored long (one row per sample and population) so that adding a
+-- population is an insert rather than an ALTER TABLE.
 
 PRAGMA foreign_keys = ON;
 
@@ -21,7 +15,6 @@ DROP TABLE IF EXISTS condition;
 DROP TABLE IF EXISTS treatment;
 DROP TABLE IF EXISTS sample_type;
 
--- ---------------------------------------------------------------- dimensions
 CREATE TABLE project (
     project_id   TEXT PRIMARY KEY               -- e.g. 'prj1'
 );
@@ -46,7 +39,6 @@ CREATE TABLE cell_population (
     name          TEXT NOT NULL UNIQUE          -- b_cell, cd8_t_cell, ...
 );
 
--- ------------------------------------------------------------------ entities
 CREATE TABLE subject (
     subject_id   TEXT PRIMARY KEY,              -- e.g. 'sbj000'
     project_id   TEXT    NOT NULL REFERENCES project(project_id),
@@ -64,7 +56,6 @@ CREATE TABLE sample (
     time_from_treatment_start INTEGER            -- days; 0 == baseline
 );
 
--- --------------------------------------------------------------------- facts
 CREATE TABLE cell_count (
     sample_id     TEXT    NOT NULL REFERENCES sample(sample_id) ON DELETE CASCADE,
     population_id INTEGER NOT NULL REFERENCES cell_population(population_id),
@@ -72,14 +63,12 @@ CREATE TABLE cell_count (
     PRIMARY KEY (sample_id, population_id)
 );
 
--- ------------------------------------------------------------------- indexes
 CREATE INDEX idx_subject_project   ON subject (project_id);
 CREATE INDEX idx_subject_cohort    ON subject (condition_id, treatment_id, response);
 CREATE INDEX idx_sample_subject    ON sample  (subject_id);
 CREATE INDEX idx_sample_type_time  ON sample  (sample_type_id, time_from_treatment_start);
 CREATE INDEX idx_cell_count_pop    ON cell_count (population_id);
 
--- --------------------------------------------------------------------- views
 -- Flat, analysis-ready row per sample with all descriptive attributes resolved.
 CREATE VIEW sample_detail AS
 SELECT s.sample_id,

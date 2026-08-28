@@ -27,4 +27,4 @@ test:
 ## Remove generated artifacts.
 clean:
 	rm -f cell_counts.db
-	rm -rf outputs/tables outputs/figures outputs/run_report.json
+	rm -rf outputs/tables outputs/figures

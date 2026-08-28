@@ -14,7 +14,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from teiko import analysis, config, db
+from teiko import analysis, config
 
 # Validated categorical slots 1 & 2 (see plots.py).
 BLUE, ORANGE = "#2a78d6", "#eb6834"
@@ -25,9 +25,6 @@ SURFACE, INK, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e5e4e0"
 st.set_page_config(page_title="Loblaw Bio — Cell Population Dashboard", layout="wide")
 
 
-# --------------------------------------------------------------------------
-# Data access (cached so filter changes don't re-query the whole database)
-# --------------------------------------------------------------------------
 @st.cache_data(show_spinner=False)
 def load_frequencies() -> pd.DataFrame:
     return analysis.frequency_with_metadata()
@@ -58,8 +55,6 @@ def _base_layout(fig: go.Figure, height: int = 460) -> go.Figure:
 def _label(population: str) -> str:
     return config.POPULATION_LABELS.get(population, population)
 
-
-# --------------------------------------------------------------------------
 if not config.DB_PATH.exists():
     st.error(
         f"`{config.DB_PATH.name}` not found. Run `python load_data.py` "
@@ -76,11 +71,10 @@ st.caption(
     f"in {freq['project_id'].nunique()} projects."
 )
 
-tab_overview, tab_stats, tab_baseline, tab_schema = st.tabs(
-    ["Overview (Part 2)", "Responders (Part 3)", "Baseline subset (Part 4)", "Database"]
+tab_overview, tab_stats, tab_baseline = st.tabs(
+    ["Overview (Part 2)", "Responders (Part 3)", "Baseline subset (Part 4)"]
 )
 
-# ------------------------------------------------------- Part 2: overview --
 with tab_overview:
     st.subheader("Relative frequency of each population in each sample")
 
@@ -140,7 +134,6 @@ with tab_overview:
         fig.update_xaxes(title="% of sample")
         st.plotly_chart(_base_layout(fig, 360), use_container_width=True)
 
-# -------------------------------------------------------- Part 3: stats ----
 with tab_stats:
     st.subheader("Responders vs non-responders")
 
@@ -169,7 +162,7 @@ with tab_stats:
         m2.metric("Subjects", f"{cohort['subject_id'].nunique():,}")
         m3.metric("Significant populations (FDR 5%)", int(results["significant"].sum()))
 
-        # ---- boxplot -----------------------------------------------------
+        # boxplot
         populations = sorted(cohort["population"].unique())
         plot_df = cohort
         if unit == "subject":
@@ -203,7 +196,7 @@ with tab_stats:
         fig.update_yaxes(title="% of sample")
         st.plotly_chart(_base_layout(fig, 500), use_container_width=True)
 
-        # ---- statistics --------------------------------------------------
+        # statistics
         st.markdown("**Statistical test**")
         st.write(analysis.significance_narrative(results))
 
@@ -250,7 +243,6 @@ with tab_stats:
             mime="text/csv",
         )
 
-# ------------------------------------------------------ Part 4: baseline ---
 with tab_baseline:
     st.subheader("Baseline melanoma PBMC samples from miraclib-treated patients")
 
@@ -315,16 +307,3 @@ with tab_baseline:
             mime="text/csv",
         )
 
-# ----------------------------------------------------------- schema tab ----
-with tab_schema:
-    st.subheader("Database")
-    tables = db.query(
-        "SELECT type, name FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' "
-        "AND type IN ('table','view') ORDER BY type, name"
-    )
-    rows = []
-    for r in tables.itertuples():
-        n = db.query(f"SELECT COUNT(*) AS n FROM {r.name}").iloc[0]["n"]
-        rows.append({"object": r.name, "type": r.type, "rows": int(n)})
-    st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
-    st.code(config.SCHEMA_PATH.read_text(), language="sql")
