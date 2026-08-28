@@ -6,10 +6,8 @@ those frequencies differ between miraclib responders and non-responders, and
 profiles the baseline melanoma cohort. Results are browsable in an interactive
 dashboard.
 
-**Hosted dashboard (read-only):**
-<https://claude.ai/code/artifact/529456ad-eacd-4644-b541-1464a17e5bf0>
-
-**Local dashboard:** `make dashboard`, then <http://localhost:8501>
+**Dashboard link:** <http://localhost:8501>, served by `make dashboard`.
+In Codespaces, open the forwarded URL that appears for port 8501 instead.
 
 ## Quick start
 
@@ -192,6 +190,15 @@ The dashboard's Baseline subset tab changes condition, treatment and timepoint a
 recomputes all three breakdowns live.
 
 ## Dashboard
+
+```bash
+make dashboard
+```
+
+Serves the dashboard at <http://localhost:8501>. In Codespaces, port 8501 is
+forwarded automatically; open the forwarded URL from the Ports panel. Use
+`make dashboard PORT=8080` to serve it elsewhere. Run `make pipeline` first, or
+at least `python load_data.py`, so the database exists.
 
 Three tabs, one per analysis:
 
