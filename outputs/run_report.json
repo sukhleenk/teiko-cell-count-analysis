@@ -1,0 +1,45 @@
+{
+  "samples": 10500,
+  "populations": 5,
+  "responder_cohort_samples": 1968,
+  "responder_cohort_subjects": 656,
+  "significant_populations_by_sample": [],
+  "significant_populations_by_subject": [],
+  "narrative": "Mann-Whitney U with Benjamini-Hochberg FDR control at alpha=0.05 across 5 cell populations (993 responder vs 975 non-responder observations). No population showed a significant difference after correction. Not significant: CD4+ T cell (q=0.07), B cell (q=0.14), NK cell (q=0.20), Monocyte (q=0.20), CD8+ T cell (q=0.64).",
+  "baseline_samples": 656,
+  "baseline_subjects": 656,
+  "baseline_breakdowns": {
+    "samples_per_project": [
+      {
+        "project": "prj1",
+        "samples": 384,
+        "subjects": 384
+      },
+      {
+        "project": "prj3",
+        "samples": 272,
+        "subjects": 272
+      }
+    ],
+    "subjects_by_response": [
+      {
+        "response": "no",
+        "subjects": 325
+      },
+      {
+        "response": "yes",
+        "subjects": 331
+      }
+    ],
+    "subjects_by_sex": [
+      {
+        "sex": "F",
+        "subjects": 312
+      },
+      {
+        "sex": "M",
+        "subjects": 344
+      }
+    ]
+  }
+}
